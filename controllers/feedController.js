@@ -96,6 +96,7 @@ exports.updatePost = (req, res, next) => {
     const postId = req.params.postID;
     //Buscar no DB
     console.log(postId);
+
     res.status(200).json({
         msg: "Post atualizado com sucesso!",
         post: postId
@@ -105,9 +106,13 @@ exports.updatePost = (req, res, next) => {
 exports.deletePost = (req, res, next) => {
     const postID = req.params.postID;
     //Buscar no DB
-    console.log(postID);
-    res.status(200).json({
-        msg: "Post excluído com sucesso!",
-        post: postID
-    });
+    post.deleteOne(postID)
+        .then(() => {
+            console.log(postID);
+            res.status(200).json({
+                msg: "Post excluído com sucesso!",
+                post: postID
+            });
+        })
+
 }
