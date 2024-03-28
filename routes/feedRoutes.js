@@ -22,4 +22,6 @@ router.post('/post',isAuth,
 router.patch("/post/:postID",isAuth, feedController.updatePost);
 router.delete("/post/:postID",isAuth, feedController.deletePost);
 
+router.get("/profile",isAuth , feedController.profile)
+
 module.exports = router;

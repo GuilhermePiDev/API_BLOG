@@ -1,5 +1,5 @@
 const { validationResult } = require("express-validator");
-const Post = require('../models/post');
+
 const User = require('../models/user');
 const post = require("../models/post");
 
@@ -10,12 +10,12 @@ exports.getPosts = (req, res, next) => {
     const perPage = req.query.perPage || 5;
     let totalItems;
 
-    Post.find()
+    post.find()
         .countDocuments()
         .then(total => {
             totalItems = total;
 
-            return Post.find()
+            return post.find()
                 .skip((page - 1) * perPage)
                 .limit(perPage);
         })
@@ -56,7 +56,7 @@ exports.createPost = (req, res, next) => {
 
     let postCreator;
 
-    const postagem = new Post({
+    const postagem = new post({
         title: title,
         content: content,
         imageUrl: imageUrl,
@@ -93,26 +93,59 @@ exports.createPost = (req, res, next) => {
 //Rotas para atualizar e deletar um post
 
 exports.updatePost = (req, res, next) => {
-    const postId = req.params.postID;
-    //Buscar no DB
-    console.log(postId);
+    const postID = req.params.postID;
 
-    res.status(200).json({
-        msg: "Post atualizado com sucesso!",
-        post: postId
-    });
+    const title = req.body.title;
+    const content = req.body.content;
+
+
+    const updateOps = { title: title, content: content };
+
+
+    post.findByIdAndUpdate(postID, { $set: updateOps }, { new: true })
+        .then(result => {
+            console.log("Post atualizado:", postID);
+            res.status(200).json({
+                msg: "Post atualizado com sucesso!",
+                post: postID
+            });
+        })
+        .catch(error => {
+            console.error("Erro ao atualizar post:", error);
+            res.status(500).json({
+                error: error
+            });
+        });
 }
 
 exports.deletePost = (req, res, next) => {
     const postID = req.params.postID;
     //Buscar no DB
-    post.deleteOne(postID)
+    post.deleteOne({ _id: postID })
         .then(() => {
             console.log(postID);
             res.status(200).json({
                 msg: "Post excluído com sucesso!",
                 post: postID
             });
+        })
+
+}
+
+exports.profile = (req, res, next) => {
+    const userID = req.userId;
+
+
+        User.findById(userID)
+        .then(result => {
+            
+            res.status(200).json({
+                msg: "tudo certo",
+                result : result
+               
+
+            });
+
         })
 
 }
