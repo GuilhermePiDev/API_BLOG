@@ -120,7 +120,7 @@ exports.updatePost = (req, res, next) => {
 
 exports.deletePost = (req, res, next) => {
     const postID = req.params.postID;
-    //Buscar no DB
+  
     post.deleteOne({ _id: postID })
         .then(() => {
             console.log(postID);
@@ -148,4 +148,56 @@ exports.profile = (req, res, next) => {
 
         })
 
+}
+
+exports.addFavorite = async (req, res, next) => {
+    const favoriteId = req.params.favoriteId;
+
+    try {
+        const user = await User.findById(req.userId);
+        if (!user) {
+            const error = new Error("Usuário não encontrado...");
+            error.statusCode = 404;
+            throw error;
+        }
+
+        user.favorites.push(favoriteId);
+        const result = await user.save();
+
+        res.status(200).json({
+            message: "Favorito adicionado com sucesso!",
+            result: result
+        });
+    } catch (error) {
+        if (!error.statusCode) {
+            error.statusCode = 500;
+        }
+        next(error);
+    }
+}
+
+exports.removeFavorite = async (req, res, next) => {
+    const favoriteId = req.params.favoriteId;
+
+    try {
+        const user = await User.findById(req.userId);
+        if (!user) {
+            const error = new Error("Usuário não encontrado...");
+            error.statusCode = 404;
+            throw error;
+        }
+
+        user.favorites.pull(favoriteId);
+        const result = await user.save();
+
+        res.status(200).json({
+            message: "Favorito removido com sucesso!",
+            result: result
+        });
+    } catch (error) {
+        if (!error.statusCode) {
+            error.statusCode = 500;
+        }
+        next(error);
+    }
 }

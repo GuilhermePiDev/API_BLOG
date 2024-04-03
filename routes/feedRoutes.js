@@ -8,7 +8,7 @@ const isAuth = require("../middleware/is-auth");
 
 //Criar as rotas relacionadas ao feed
 
-router.get('/posts', feedController.getPosts);
+router.get('/posts',isAuth, feedController.getPosts);
 
 //Validar as informações
 router.post('/post',isAuth,
@@ -23,5 +23,7 @@ router.patch("/post/:postID",isAuth, feedController.updatePost);
 router.delete("/post/:postID",isAuth, feedController.deletePost);
 
 router.get("/profile",isAuth , feedController.profile)
+router.post("/addFav/:favoriteId",isAuth , feedController.addFavorite)
+router.delete("/removeFav/:favoriteId",isAuth , feedController.removeFavorite)
 
 module.exports = router;

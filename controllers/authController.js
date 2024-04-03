@@ -2,7 +2,7 @@ const { validationResult } = require("express-validator");
 const User = require("../models/user")
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const user = require("../models/user");
+
 
 exports.signUpUser = (req, res, next) => {
     const errors = validationResult(req);
@@ -82,3 +82,98 @@ exports.signInUser = async (req, res, next) => {
             next(error)
         })
 }
+
+exports.changeName = async (req, res, next) => {
+    const newName = req.body.name;
+
+    try {
+        const user = await User.findById(req.userId);
+        if (!user) {
+            const error = new Error("Usuário não encontrado...");
+            error.statusCode = 404;
+            throw error;
+        }
+
+        user.name = newName;
+        const result = await user.save();
+
+        res.status(200).json({
+            message: "Nome do usuário atualizado com sucesso!",
+            result: result
+        });
+    } catch (error) {
+        if (!error.statusCode) {
+            error.statusCode = 500;
+        }
+        next(error);
+    }
+}
+
+exports.changePassword = async (req, res, next) => {
+    const oldPassword = req.body.oldPassword;
+    const newPassword = req.body.newPassword;
+
+    try {
+        const user = await User.findById(req.userId);
+        if (!user) {
+            const error = new Error("Usuário não encontrado...");
+            error.statusCode = 404;
+            throw error;
+        }
+
+        const isEqual = await bcrypt.compare(oldPassword, user.password);
+        if (!isEqual) {
+            const error = new Error("Senha antiga incorreta...");
+            error.statusCode = 401;
+            throw error;
+        }
+
+        const hashedPassword = await bcrypt.hash(newPassword, 12);
+        user.password = hashedPassword;
+        const result = await user.save();
+
+        res.status(200).json({
+            message: "Senha do usuário atualizada com sucesso!",
+            result: result
+        });
+    } catch (error) {
+        if (!error.statusCode) {
+            error.statusCode = 500;
+        }
+        next(error);
+    }
+}
+
+exports.deleteUser = async (req, res, next) => {
+    const userID = req.userId;
+    const password = req.body.password;
+
+    const user = await  User.findById(userID);
+    if (!user) {
+        const error = new Error("Usuário não encontrado...");
+        error.statusCode = 404;
+        throw error;
+    }
+
+    const isEqual = await  bcrypt.compare(password, user.password);
+    if (!isEqual) {
+        const error = new Error("Senha incorreta...");
+        error.statusCode = 401;
+        res.status(401).json({
+            msg: "Senha incorreta"
+        });
+        throw error;
+    }
+    console.log(userID)
+    User.deleteOne({ _id: userID })
+        .then(() => {
+            console.log(userID);
+            res.status(200).json({
+                msg: "User excluído com sucesso!",
+                User: userID
+            });
+        })
+}
+
+
+

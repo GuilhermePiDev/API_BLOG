@@ -20,7 +20,14 @@ const userSchema =new Schema (
                 type: Schema.Types.ObjectId,
                 ref: 'Post'
             }
+        ],
+        favorites: [
+            {
+                type: Schema.Types.ObjectId,
+                ref: 'Post' 
+            }
         ]
+    
         
     },
     {
